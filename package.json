@@ -1,0 +1,24 @@
+{
+  "name": "erc1155-puppet",
+  "version": "1.0.0",
+  "description": "an erc1155 compatible puppet module for the mud framework",
+  "main": "ERC1155Module.sol",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MrDeadCe11/ERC1155-puppet.git"
+  },
+  "keywords": [
+    "ERC1155",
+    "Mud",
+    "module"
+  ],
+  "author": "MrDeadCe11",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MrDeadCe11/ERC1155-puppet/issues"
+  },
+  "homepage": "https://github.com/MrDeadCe11/ERC1155-puppet#readme"
+}
