@@ -23,8 +23,8 @@ import { TotalSupply } from './tables/TotalSupply.sol';
 import { ERC1155Utils } from './libraries/utils/ERC1155Utils.sol';
 
 import { _metadataTableId, _erc1155URIStorageTableId, _totalSupplyTableId, _operatorApprovalTableId, _ownersTableId } from './utils.sol';
-import { LibString } from './libraries/LibString.sol';
-
+import { LibString } from '../libraries/LibString.sol';
+import 'forge-std/console2.sol';
 contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, System, PuppetMaster {
   using WorldResourceIdInstance for ResourceId;
   using LibString for uint256;
@@ -107,12 +107,6 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
   function mint(address to, uint256 tokenId, uint256 value, bytes memory data) public virtual {
     _mint(to, tokenId, value, data);
   }
-
-  function setMetadataURI(string memory metadataURI) public virtual {
-    _requireOwner();
-    ERC1155MetadataURI.setUri(_metadataTableId(_namespace()), metadataURI );
-  }
-
 
   /**
    * @dev Mints `tokenId` and transfers it to `to`.
@@ -254,6 +248,7 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
   function _setAccountBalance(address account, uint256 tokenId, int256 delta) internal returns (uint256 balance) {
     if (delta < 0) {
       balance = uint256(balanceOf(account, tokenId) - uint256(-delta));
+
     } else {
       balance = uint256(balanceOf(account, tokenId) + uint256(delta));
 
@@ -263,19 +258,6 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
 
   function totalSupply(uint256 tokenId) public view returns (uint256 _totalSupply) {
     _totalSupply = TotalSupply.getTotalSupply(_totalSupplyTableId(_namespace()), tokenId);
-  }
-
-  function currentSupply(uint256 tokenId) public view returns (uint256 _currentSupply) {
-    _currentSupply = TotalSupply.getCurrentSupply(_totalSupplyTableId(_namespace()), tokenId);
-  }
-
-  function _setCurrentSupply(uint256 tokenId, int256 delta) internal returns (uint256 supply) {
-    if (delta < 0) {
-      supply = currentSupply(tokenId) - uint256(-delta);
-    } else {
-      supply = currentSupply(tokenId) + uint256(delta);
-    }
-    TotalSupply.setCurrentSupply(_totalSupplyTableId(_namespace()), tokenId, supply);
   }
 
   function _setTotalSupply(uint256 tokenId, int256 delta) internal returns (uint256 supply) {
@@ -317,6 +299,7 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
     uint256 tokenId;
     uint256 _value;
     for (uint256 i; i < len; i++) {
+      console2.log('len', len);
       tokenId = tokenIds[i];
       _value = _values[i];
 
@@ -324,7 +307,6 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
         _requireOwner();
         // Overflow check required: The rest of the code assumes that totalSupply never overflows
         _setTotalSupply(tokenId, int256(_value));
-        _setCurrentSupply(tokenId, int256(_value));
       } else {
         if(totalSupply(tokenId) == 0)revert ERC1155NonexistentToken(tokenId);
         fromBalance = balanceOf(from, tokenId);
@@ -335,6 +317,7 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
 
       // Perform (optional) operator check
       if (to != address(0)) {
+        console2.log("calling set to");
         unchecked {
           _setAccountBalance(to, tokenId, int256(_value));
         }
@@ -342,6 +325,7 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
 
       // Execute the update
       if (from != address(0)) {
+        console2.log('calling set from');
         unchecked {
           _setAccountBalance(from, tokenId, -int256(_value));
         }
@@ -379,7 +363,6 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
 
     _update(account, address(0), ids, values);
     _setTotalSupply(tokenId, -int256(value));
-    _setCurrentSupply(tokenId, -int256(value));
   }
 
   /**
@@ -549,6 +532,8 @@ contract ERC1155System is IERC1155, IERC1155MetadataURI, IERC1155Receiver, Syste
   ) private {
     if (to.code.length > 0) {
       try IERC1155Receiver(to).onERC1155Received(_msgSender(), from, tokenId, value, data) returns (bytes4 retval) {
+        console2.logBytes4(retval);
+        console2.logBytes4(IERC1155Receiver.onERC1155Received.selector);
         if (retval != IERC1155Receiver.onERC1155Received.selector) {
           revert ERC1155InvalidReceiver(to);
         }
