@@ -88,7 +88,6 @@ contract ERC1155ModuleRegistrationLibrary {
     ERC1155MetadataURI.register(_metadataTableId(namespace));
     TotalSupply.register(_totalSupplyTableId(namespace));
 
-    console2.logBytes14(namespace);
     // Register a new ERC1155System
     world.registerSystem(_erc1155SystemId(namespace), new ERC1155System(), true);
   }
