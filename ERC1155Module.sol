@@ -22,7 +22,7 @@ import { ERC1155Registry } from './tables/ERC1155Registry.sol';
 import { ERC1155MetadataURI } from './tables/ERC1155MetadataURI.sol';
 import { ERC1155URIStorage } from './tables/ERC1155URIStorage.sol';
 import { TotalSupply } from './tables/TotalSupply.sol';
-import 'forge-std/console2.sol';
+
 contract ERC1155Module is Module {
   error ERC1155Module_InvalidNamespace(bytes14 namespace);
 
