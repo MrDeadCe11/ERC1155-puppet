@@ -29,7 +29,7 @@ import {
     _ownersTableId
 } from "./utils.sol";
 
-import {LibString} from "../libraries/LibString.sol";
+import {LibString} from "./libraries/LibString.sol";
 import "forge-std/console2.sol";
 
 contract ERC1155System is IERC1155MetadataURI, System, PuppetMaster {
