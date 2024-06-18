@@ -19,14 +19,19 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 // Import user types
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
+struct ERC1155RegistryData {
+  address tokenAddress;
+  address uriStorage;
+}
+
 library ERC1155Registry {
   FieldLayout constant _fieldLayout =
-    FieldLayout.wrap(0x0014010014000000000000000000000000000000000000000000000000000000);
+    FieldLayout.wrap(0x0028020014140000000000000000000000000000000000000000000000000000);
 
   // Hex-encoded key schema of (bytes32)
   Schema constant _keySchema = Schema.wrap(0x002001005f000000000000000000000000000000000000000000000000000000);
-  // Hex-encoded value schema of (address)
-  Schema constant _valueSchema = Schema.wrap(0x0014010061000000000000000000000000000000000000000000000000000000);
+  // Hex-encoded value schema of (address, address)
+  Schema constant _valueSchema = Schema.wrap(0x0028020061610000000000000000000000000000000000000000000000000000);
 
   /**
    * @notice Get the table's key field names.
@@ -42,8 +47,9 @@ library ERC1155Registry {
    * @return fieldNames An array of strings with the names of value fields.
    */
   function getFieldNames() internal pure returns (string[] memory fieldNames) {
-    fieldNames = new string[](1);
+    fieldNames = new string[](2);
     fieldNames[0] = "tokenAddress";
+    fieldNames[1] = "uriStorage";
   }
 
   /**
@@ -83,28 +89,6 @@ library ERC1155Registry {
   }
 
   /**
-   * @notice Get tokenAddress.
-   */
-  function get(ResourceId _tableId, ResourceId namespaceId) internal view returns (address tokenAddress) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(namespaceId);
-
-    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (address(bytes20(_blob)));
-  }
-
-  /**
-   * @notice Get tokenAddress.
-   */
-  function _get(ResourceId _tableId, ResourceId namespaceId) internal view returns (address tokenAddress) {
-    bytes32[] memory _keyTuple = new bytes32[](1);
-    _keyTuple[0] = ResourceId.unwrap(namespaceId);
-
-    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 0, _fieldLayout);
-    return (address(bytes20(_blob)));
-  }
-
-  /**
    * @notice Set tokenAddress.
    */
   function setTokenAddress(ResourceId _tableId, ResourceId namespaceId, address tokenAddress) internal {
@@ -125,23 +109,158 @@ library ERC1155Registry {
   }
 
   /**
-   * @notice Set tokenAddress.
+   * @notice Get uriStorage.
    */
-  function set(ResourceId _tableId, ResourceId namespaceId, address tokenAddress) internal {
+  function getUriStorage(ResourceId _tableId, ResourceId namespaceId) internal view returns (address uriStorage) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = ResourceId.unwrap(namespaceId);
 
-    StoreSwitch.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((tokenAddress)), _fieldLayout);
+    bytes32 _blob = StoreSwitch.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
+    return (address(bytes20(_blob)));
   }
 
   /**
-   * @notice Set tokenAddress.
+   * @notice Get uriStorage.
    */
-  function _set(ResourceId _tableId, ResourceId namespaceId, address tokenAddress) internal {
+  function _getUriStorage(ResourceId _tableId, ResourceId namespaceId) internal view returns (address uriStorage) {
     bytes32[] memory _keyTuple = new bytes32[](1);
     _keyTuple[0] = ResourceId.unwrap(namespaceId);
 
-    StoreCore.setStaticField(_tableId, _keyTuple, 0, abi.encodePacked((tokenAddress)), _fieldLayout);
+    bytes32 _blob = StoreCore.getStaticField(_tableId, _keyTuple, 1, _fieldLayout);
+    return (address(bytes20(_blob)));
+  }
+
+  /**
+   * @notice Set uriStorage.
+   */
+  function setUriStorage(ResourceId _tableId, ResourceId namespaceId, address uriStorage) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    StoreSwitch.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((uriStorage)), _fieldLayout);
+  }
+
+  /**
+   * @notice Set uriStorage.
+   */
+  function _setUriStorage(ResourceId _tableId, ResourceId namespaceId, address uriStorage) internal {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    StoreCore.setStaticField(_tableId, _keyTuple, 1, abi.encodePacked((uriStorage)), _fieldLayout);
+  }
+
+  /**
+   * @notice Get the full data.
+   */
+  function get(ResourceId _tableId, ResourceId namespaceId) internal view returns (ERC1155RegistryData memory _table) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    (bytes memory _staticData, EncodedLengths _encodedLengths, bytes memory _dynamicData) = StoreSwitch.getRecord(
+      _tableId,
+      _keyTuple,
+      _fieldLayout
+    );
+    return decode(_staticData, _encodedLengths, _dynamicData);
+  }
+
+  /**
+   * @notice Get the full data.
+   */
+  function _get(ResourceId _tableId, ResourceId namespaceId) internal view returns (ERC1155RegistryData memory _table) {
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    (bytes memory _staticData, EncodedLengths _encodedLengths, bytes memory _dynamicData) = StoreCore.getRecord(
+      _tableId,
+      _keyTuple,
+      _fieldLayout
+    );
+    return decode(_staticData, _encodedLengths, _dynamicData);
+  }
+
+  /**
+   * @notice Set the full data using individual values.
+   */
+  function set(ResourceId _tableId, ResourceId namespaceId, address tokenAddress, address uriStorage) internal {
+    bytes memory _staticData = encodeStatic(tokenAddress, uriStorage);
+
+    EncodedLengths _encodedLengths;
+    bytes memory _dynamicData;
+
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    StoreSwitch.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
+  }
+
+  /**
+   * @notice Set the full data using individual values.
+   */
+  function _set(ResourceId _tableId, ResourceId namespaceId, address tokenAddress, address uriStorage) internal {
+    bytes memory _staticData = encodeStatic(tokenAddress, uriStorage);
+
+    EncodedLengths _encodedLengths;
+    bytes memory _dynamicData;
+
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
+  }
+
+  /**
+   * @notice Set the full data using the data struct.
+   */
+  function set(ResourceId _tableId, ResourceId namespaceId, ERC1155RegistryData memory _table) internal {
+    bytes memory _staticData = encodeStatic(_table.tokenAddress, _table.uriStorage);
+
+    EncodedLengths _encodedLengths;
+    bytes memory _dynamicData;
+
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    StoreSwitch.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData);
+  }
+
+  /**
+   * @notice Set the full data using the data struct.
+   */
+  function _set(ResourceId _tableId, ResourceId namespaceId, ERC1155RegistryData memory _table) internal {
+    bytes memory _staticData = encodeStatic(_table.tokenAddress, _table.uriStorage);
+
+    EncodedLengths _encodedLengths;
+    bytes memory _dynamicData;
+
+    bytes32[] memory _keyTuple = new bytes32[](1);
+    _keyTuple[0] = ResourceId.unwrap(namespaceId);
+
+    StoreCore.setRecord(_tableId, _keyTuple, _staticData, _encodedLengths, _dynamicData, _fieldLayout);
+  }
+
+  /**
+   * @notice Decode the tightly packed blob of static data using this table's field layout.
+   */
+  function decodeStatic(bytes memory _blob) internal pure returns (address tokenAddress, address uriStorage) {
+    tokenAddress = (address(Bytes.getBytes20(_blob, 0)));
+
+    uriStorage = (address(Bytes.getBytes20(_blob, 20)));
+  }
+
+  /**
+   * @notice Decode the tightly packed blobs using this table's field layout.
+   * @param _staticData Tightly packed static fields.
+   *
+   *
+   */
+  function decode(
+    bytes memory _staticData,
+    EncodedLengths,
+    bytes memory
+  ) internal pure returns (ERC1155RegistryData memory _table) {
+    (_table.tokenAddress, _table.uriStorage) = decodeStatic(_staticData);
   }
 
   /**
@@ -168,8 +287,8 @@ library ERC1155Registry {
    * @notice Tightly pack static (fixed length) data using this table's schema.
    * @return The static data, encoded into a sequence of bytes.
    */
-  function encodeStatic(address tokenAddress) internal pure returns (bytes memory) {
-    return abi.encodePacked(tokenAddress);
+  function encodeStatic(address tokenAddress, address uriStorage) internal pure returns (bytes memory) {
+    return abi.encodePacked(tokenAddress, uriStorage);
   }
 
   /**
@@ -178,8 +297,11 @@ library ERC1155Registry {
    * @return The lengths of the dynamic fields (packed into a single bytes32 value).
    * @return The dynamic (variable length) data, encoded into a sequence of bytes.
    */
-  function encode(address tokenAddress) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
-    bytes memory _staticData = encodeStatic(tokenAddress);
+  function encode(
+    address tokenAddress,
+    address uriStorage
+  ) internal pure returns (bytes memory, EncodedLengths, bytes memory) {
+    bytes memory _staticData = encodeStatic(tokenAddress, uriStorage);
 
     EncodedLengths _encodedLengths;
     bytes memory _dynamicData;

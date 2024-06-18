@@ -11,8 +11,8 @@ import {ERC1155Module} from "./ERC1155Module.sol";
 import {MODULE_NAMESPACE_ID, ERC1155_REGISTRY_TABLE_ID} from "./constants.sol";
 import {IERC1155} from "./IERC1155.sol";
 
-import {ERC1155MetadataURI} from "./tables/ERC1155MetadataURI.sol";
-import {ERC1155Registry} from "./tables/ERC1155Registry.sol";
+import {ERC1155MetadataURI} from "../codegen/tables/ERC1155MetadataURI.sol";
+import {ERC1155Registry} from "../codegen/tables/ERC1155Registry.sol";
 import "forge-std/console2.sol";
 
 /**
@@ -31,5 +31,7 @@ function registerERC1155(IBaseWorld world, bytes14 namespace, string memory meta
     world.installModule(erc1155Module, abi.encode(namespace, metaDataURI));
 
     // Return the newly created ERC1155 token
-    token = IERC1155(ERC1155Registry.get(ERC1155_REGISTRY_TABLE_ID, WorldResourceIdLib.encodeNamespace(namespace)));
+    token = IERC1155(
+        ERC1155Registry.getTokenAddress(ERC1155_REGISTRY_TABLE_ID, WorldResourceIdLib.encodeNamespace(namespace))
+    );
 }

@@ -10,20 +10,21 @@ import {
     _operatorApprovalTableId,
     _ownersTableId
 } from "./utils.sol";
-import {ERC1155MetadataURI} from "./tables/ERC1155MetadataURI.sol";
-import {ERC1155URIStorage} from "./tables/ERC1155URIStorage.sol";
+import {ERC1155MetadataURI} from "../codegen/tables/ERC1155MetadataURI.sol";
+import {IERC1155MetadataURI} from "./IERC1155MetadataURI.sol";
+import {ERC1155URIStorage} from "../codegen/tables/ERC1155URIStorage.sol";
 import {SystemRegistry} from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import {AccessControlLib} from "@latticexyz/world-modules/src/utils/AccessControlLib.sol";
 import {PuppetMaster} from "@latticexyz/world-modules/src/modules/puppet/PuppetMaster.sol";
 import {WorldResourceIdInstance} from "@latticexyz/world/src/WorldResourceId.sol";
 import "forge-std/console2.sol";
 
-contract ERC1155URIStorageSystem is System {
+contract ERC1155URIStorageSystem is System, PuppetMaster {
     using WorldResourceIdInstance for ResourceId;
 
     function setTokenURI(uint256 tokenId, string memory tokenURI) public {
         console2.log("SET TOKEN URI");
-        // _requireOwner();
+        _requireOwner();
         console2.log("owner requires");
         ERC1155URIStorage.setUri(_erc1155URIStorageTableId(_namespace()), tokenId, tokenURI);
     }

@@ -23,20 +23,21 @@ import {
     _ownersTableId
 } from "./utils.sol";
 import {ERC1155System} from "./ERC1155System.sol";
-import {ERC1155URIStorageSystem} from "./ERC1155URIStorageSystem.sol";
+// import {ERC1155URIStorageSystem} from "./ERC1155URIStorageSystem.sol";
 
-import {Owners} from "./tables/Owners.sol";
-import {OperatorApproval} from "./tables/OperatorApproval.sol";
-import {ERC1155Registry} from "./tables/ERC1155Registry.sol";
-import {ERC1155MetadataURI} from "./tables/ERC1155MetadataURI.sol";
-import {ERC1155URIStorage} from "./tables/ERC1155URIStorage.sol";
-import {TotalSupply} from "./tables/TotalSupply.sol";
+import {Owners} from "../codegen/tables/Owners.sol";
+import {OperatorApproval} from "../codegen/tables/OperatorApproval.sol";
+import {ERC1155Registry} from "../codegen/tables/ERC1155Registry.sol";
+import {ERC1155MetadataURI} from "../codegen/tables/ERC1155MetadataURI.sol";
+import {ERC1155URIStorage} from "../codegen/tables/ERC1155URIStorage.sol";
+import {TotalSupply} from "../codegen/tables/TotalSupply.sol";
 import "forge-std/console2.sol";
 
 contract ERC1155Module is Module {
     error ERC1155Module_InvalidNamespace(bytes14 namespace);
 
     address public immutable registrationLibrary = address(new ERC1155ModuleRegistrationLibrary());
+    // address public immutable uriStorageRegistrationLibrary = address(new ERC1155URIStorageRegistrationLibrary());
 
     function install(bytes memory encodedArgs) public {
         // Require the module to not be installed with these args yet
@@ -56,7 +57,11 @@ contract ERC1155Module is Module {
             abi.encodeCall(ERC1155ModuleRegistrationLibrary.register, (world, namespace))
         );
         if (!success) revertWithBytes(returnData);
-
+        // Register the ERC1155UriStorage tables and system
+        // (bool uriSuccess, bytes memory uriReturnData) = uriStorageRegistrationLibrary.delegatecall(
+        //     abi.encodeCall(ERC1155URIStorageRegistrationLibrary.register, (world, namespace))
+        // );
+        // if (!uriSuccess) revertWithBytes(uriReturnData);
         // Initialize the Metadata
         ERC1155MetadataURI.set(_metadataTableId(namespace), metaDataURI);
 
@@ -77,8 +82,8 @@ contract ERC1155Module is Module {
             ERC1155Registry.register(ERC1155_REGISTRY_TABLE_ID);
         }
 
-        ERC1155Registry.set(ERC1155_REGISTRY_TABLE_ID, namespaceId, puppet);
-        // ERC1155Registry.set(ERC1155_REGISTRY_TABLE_ID, namespaceId, uriPuppet);
+        ERC1155Registry.setTokenAddress(ERC1155_REGISTRY_TABLE_ID, namespaceId, puppet);
+        // ERC1155Registry.setUriStorage(ERC1155_REGISTRY_TABLE_ID, namespaceId, uriPuppet);
     }
 
     function installRoot(bytes memory) public pure {
@@ -98,8 +103,8 @@ contract ERC1155ModuleRegistrationLibrary {
         // Register the tables
         OperatorApproval.register(_operatorApprovalTableId(namespace));
         Owners.register(_ownersTableId(namespace));
-        ERC1155URIStorage.register(_erc1155URIStorageTableId(namespace));
         ERC1155MetadataURI.register(_metadataTableId(namespace));
+        ERC1155URIStorage.register(_erc1155URIStorageTableId(namespace));
         TotalSupply.register(_totalSupplyTableId(namespace));
 
         // Register a new ERC1155System
@@ -108,3 +113,17 @@ contract ERC1155ModuleRegistrationLibrary {
         // world.registerSystem(_erc1155URIStorageSystemId(namespace), new ERC1155URIStorageSystem(), true);
     }
 }
+
+// contract ERC1155URIStorageRegistrationLibrary {
+//     function register(IBaseWorld world, bytes14 namespace) public {
+//         // Register the namespace if it doesn't exist yet
+//         // ResourceId tokenNamespace = WorldResourceIdLib.encodeNamespace(namespace);
+//         // world.registerNamespace(tokenNamespace);
+
+//         // Register the tables
+//         ERC1155URIStorage.register(_erc1155URIStorageTableId(namespace));
+
+//         // register URI storage system
+//         world.registerSystem(_erc1155URIStorageSystemId(namespace), new ERC1155URIStorageSystem(), true);
+//     }
+// }
