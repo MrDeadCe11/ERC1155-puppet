@@ -10,8 +10,8 @@ import {
     _operatorApprovalTableId,
     _ownersTableId
 } from "./utils.sol";
-import {ERC1155MetadataURI} from "../codegen/tables/ERC1155MetadataURI.sol";
-import {ERC1155URIStorage} from "../codegen/tables/ERC1155URIStorage.sol";
+import {ERC1155MetadataURI} from "./tables/ERC1155MetadataURI.sol";
+import {ERC1155URIStorage} from "./tables/ERC1155URIStorage.sol";
 import {SystemRegistry} from "@latticexyz/world/src/codegen/tables/SystemRegistry.sol";
 import {AccessControlLib} from "@latticexyz/world-modules/src/utils/AccessControlLib.sol";
 import {PuppetMaster} from "@latticexyz/world-modules/src/modules/puppet/PuppetMaster.sol";

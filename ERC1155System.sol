@@ -14,12 +14,12 @@ import {IERC1155Receiver} from "./IERC1155Receiver.sol";
 import {IERC1155} from "./IERC1155.sol";
 import {IERC1155MetadataURI} from "./IERC1155MetadataURI.sol";
 
-import {ERC1155MetadataURI} from "../codegen/tables/ERC1155MetadataURI.sol";
-import {ERC1155URIStorage} from "../codegen/tables/ERC1155URIStorage.sol";
-import {OperatorApproval} from "../codegen/tables/OperatorApproval.sol";
-import {Owners} from "../codegen/tables/Owners.sol";
-import {TotalSupply} from "../codegen/tables/TotalSupply.sol";
-import {ERC1155Utils} from "../libraries/utils/ERC1155Utils.sol";
+import {ERC1155MetadataURI} from "./tables/ERC1155MetadataURI.sol";
+import {ERC1155URIStorage} from "./tables/ERC1155URIStorage.sol";
+import {OperatorApproval} from "./tables/OperatorApproval.sol";
+import {Owners} from "./tables/Owners.sol";
+import {TotalSupply} from "./tables/TotalSupply.sol";
+import {ERC1155Utils} from "./libraries/utils/ERC1155Utils.sol";
 
 import {
     _metadataTableId,
@@ -29,7 +29,7 @@ import {
     _ownersTableId
 } from "./utils.sol";
 
-import {LibString} from "../libraries/LibString.sol";
+import {LibString} from "./libraries/LibString.sol";
 import "forge-std/console2.sol";
 
 contract ERC1155System is IERC1155, System, PuppetMaster {
